@@ -15,5 +15,13 @@ class Lista{
   {
     _rolesLista.add(RolLista(rol: Rol.propietario, usuario: usuarioPropietario));
   }
+
+  void addElemento({required Elemento elemento}){
+    this._elementos.add(elemento);
+  }
+
+  void addMiembro({required Usuario usuario, required Rol rol}){
+    this._rolesLista.add(RolLista(rol: rol, usuario: usuario));
+  }
 }
 
