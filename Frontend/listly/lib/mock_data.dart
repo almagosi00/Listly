@@ -3,7 +3,7 @@ import 'package:listly/data/lista.dart';
 import 'package:listly/data/rol.dart';
 import 'package:listly/data/usuario.dart';
 
-void mockData(){
+List<Lista> mockData(){
 
   Usuario usu = Usuario(nombre: "Javier Rodríguez", correo: "javier.rodriguez@gmail.com");
 
@@ -17,7 +17,7 @@ void mockData(){
   List<Lista> listas = [];
   int idUltimo = 0;
 
-  listas.add(Lista(nombre: "Compra Semanal", id: idUltimo, usuarioPropietario: usu));
+  listas.add(Lista(nombre: "Compra Semanal", id: idUltimo, usuarioPropietario: usu, emoji: "🛒​"));
 
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Tomates", creador: usu));
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Pan", creador: usu));
@@ -30,6 +30,7 @@ void mockData(){
   listas[idUltimo].addMiembro(usuario: usuariosExtras[3], rol: Rol.lector);
 
 
+  //listas.add(Lista(nombre: "Cumple Ana", id: ++idUltimo, usuarioPropietario: usu, emoji: "🎂​"));
   listas.add(Lista(nombre: "Cumple Ana", id: ++idUltimo, usuarioPropietario: usu));
 
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Tarta", creador: usu));
@@ -40,7 +41,7 @@ void mockData(){
   listas[idUltimo].addMiembro(usuario: usuariosExtras[2], rol: Rol.modificador);
 
 
-  listas.add(Lista(nombre: "Tareas Piso", id: ++idUltimo, usuarioPropietario: usu));
+  listas.add(Lista(nombre: "Tareas Piso", id: ++idUltimo, usuarioPropietario: usu, emoji: "🏠​"));
 
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Lavadora", creador: usu));
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Barrer", creador: usu));
@@ -52,12 +53,14 @@ void mockData(){
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Preparar cumpleaños", creador: usu));
 
 
-  listas.add(Lista(nombre: "Libros Pendientes", id: ++idUltimo, usuarioPropietario: usu));
+  listas.add(Lista(nombre: "Libros Pendientes", id: ++idUltimo, usuarioPropietario: usu, emoji: "📚"));
 
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Los pilares de la tierra", creador: usu));
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "Saga la rueda del tiempo", creador: usu));
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "El quijote", creador: usu));
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "La saga the witcher", creador: usu));
   listas[idUltimo].addElemento(elemento: Elemento(nombre: "La saga de Duna", creador: usu));
+
+  return listas;
 
 }
