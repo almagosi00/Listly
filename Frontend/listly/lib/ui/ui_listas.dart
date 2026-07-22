@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:listly/data/lista.dart';
 import 'package:listly/mock_data.dart';
+import 'package:listly/theme/app_color.dart';
 import 'package:listly/theme/app_sizer.dart';
 
 class ListasPage extends StatefulWidget{
@@ -106,7 +107,7 @@ class _ListaCard extends StatelessWidget{
           width: AppSizes.sizeStackIconLista,
           height: AppSizes.sizeStackIconLista,
           decoration: BoxDecoration(
-            color: const Color(0xFFE4EAE1),
+            color: AppColor.colorIconLista,
             borderRadius: BorderRadius.circular(AppSizes.radioIconLista),
           ),
           alignment: Alignment.center,
@@ -119,7 +120,7 @@ class _ListaCard extends StatelessWidget{
             right: AppSizes.rightIconListaShare,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColor.colorIconListaShare,
                 shape: BoxShape.circle,
               ),
               child: Icon(
