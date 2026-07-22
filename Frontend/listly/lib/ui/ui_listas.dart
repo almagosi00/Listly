@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:listly/data/lista.dart';
 import 'package:listly/mock_data.dart';
+import 'package:listly/theme/app_sizer.dart';
 
 class ListasPage extends StatefulWidget{
   final String tituloPage;
@@ -24,17 +25,17 @@ class _ListaPageState extends State<ListasPage>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(widget.tituloPage),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSizes.paddingBuscador),
             child: Text('Aquí irá el buscador'), // de momento, un placeholder
           ),
           Expanded(child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSizes.paddingListaView),
             children:
               this._listas.map((lista) => _ListaCard(lista: lista)).toList(),
           ))
@@ -56,13 +57,13 @@ class _ListaCard extends StatelessWidget{
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSizes.paddingCard),
         child: Row(
           children: [
 
             this._iconLista(),
 
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSizes.widthCardSizeBoxRow),
 
             Expanded(
               child: Column(
@@ -102,20 +103,20 @@ class _ListaCard extends StatelessWidget{
     return Stack(
       children: [
         Container(
-          width: 42,
-          height: 42,
+          width: AppSizes.sizeStackIconLista,
+          height: AppSizes.sizeStackIconLista,
           decoration: BoxDecoration(
             color: const Color(0xFFE4EAE1),
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(AppSizes.radioIconLista),
           ),
           alignment: Alignment.center,
-          child: Text(this._lista.emoji, textScaler: TextScaler.linear(1.5)),
+          child: Text(this._lista.emoji, textScaler: TextScaler.linear(AppSizes.scalarIconLista)),
         ),        
         
         if (this._lista.compartida)
           Positioned(
-            bottom: 0,
-            right: 0,
+            bottom: AppSizes.bottomIconListaShare,
+            right: AppSizes.rightIconListaShare,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -123,7 +124,7 @@ class _ListaCard extends StatelessWidget{
               ),
               child: Icon(
                 Icons.share,
-                size: 16,
+                size: AppSizes.sizeIconListaShare,
               ),
             ),
           )
