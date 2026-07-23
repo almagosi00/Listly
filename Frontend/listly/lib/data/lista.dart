@@ -34,5 +34,6 @@ class Lista{
   int get numPersonas => this._rolesLista.length;
   bool get compartida => this._rolesLista.length > 1;
   DateTime get modificacion => this._modificacion;
+  List<Elemento> get elementos => this._elementos;
 }
 
