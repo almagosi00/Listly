@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Listly',
-      theme: AppTheme.light,
+      theme: AppTheme.light(Color(0xFF2F5233)),
   debugShowCheckedModeBanner: true, //Cinta del debug
       home: const ListasPage(tituloPage: "Demo Listly"),
     );

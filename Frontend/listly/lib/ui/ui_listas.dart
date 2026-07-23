@@ -15,11 +15,17 @@ class ListasPage extends StatefulWidget{
 class _ListaPageState extends State<ListasPage>{
 
   List<Lista> _listas = [];
+  List<Lista> _viewListas = [];
+  final TextEditingController _buscadorController = TextEditingController();
+  Ordenar _ordenActual = Ordenar.alfabetico;
 
   @override
   void initState() {
     super.initState();
     this._listas = mockData();
+    this._viewListas = List.of(this._listas);
+
+    this._ordenarViewLista();
   }
 
   @override
@@ -31,20 +37,77 @@ class _ListaPageState extends State<ListasPage>{
       ),
       body: Column(
         children: [
-          Padding(
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(AppSizes.radioIconLista),
+                bottomRight: Radius.circular(AppSizes.radioIconLista),
+              ),
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
             padding: const EdgeInsets.all(AppSizes.paddingBuscador),
-            child: Text('Aquí irá el buscador'), // de momento, un placeholder
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: this._buscadorController,
+                    decoration: const InputDecoration(
+                      hintText: "Buscar lista...",
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (text) {
+                      setState(() {
+                        if (text.isEmpty){
+                          this._viewListas = List.of(this._listas);
+                        }
+                        else{
+                          this._viewListas = this._listas.where((element) => element.nombre.toLowerCase().contains(text.toLowerCase())).toList();
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: AppSizes.widthBusquedaSizedBoxRow),
+                Row(
+                  children: [        
+                    Icon(Icons.sort),      
+                    const SizedBox( width: AppSizes.widthOrdenarSizedBoxRow),      
+                    DropdownButton<Ordenar>(
+                      value: this._ordenActual,
+                      items: Ordenar.values.map((orden) => DropdownMenuItem(value: orden ,child: Text(orden.texto))).toList(), 
+                      onChanged: (nuevoOrden) {
+                        setState(() {
+                          this._ordenActual = nuevoOrden!;
+                          this._ordenarViewLista();                          
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           Expanded(child: ListView(
             padding: const EdgeInsets.all(AppSizes.paddingListaView),
             children:
-              this._listas.map((lista) => _ListaCard(lista: lista)).toList(),
+              this._viewListas.map((lista) => _ListaCard(lista: lista)).toList(),
           ))
         ],
       )
     );
   }
   
+  void _ordenarViewLista(){
+    switch(this._ordenActual){                            
+      case Ordenar.alfabetico:
+        this._viewListas.sort((a, b) => a.nombre.compareTo(b.nombre),);
+      case Ordenar.recienModif:
+        this._viewListas.sort((a, b) => a.modificacion.compareTo(b.modificacion));
+      case Ordenar.antiguaModif:
+        this._viewListas.sort((a, b) => b.modificacion.compareTo(a.modificacion));
+    }
+  }
+
 }
 
 
@@ -134,3 +197,13 @@ class _ListaCard extends StatelessWidget{
   }
 
 }
+
+enum Ordenar{
+  alfabetico("Alfabético"),
+  recienModif("Modif. mas reciente"),
+  antiguaModif("Modif. mas antigua");
+
+  final String texto;
+
+  const Ordenar(this.texto);
+} 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class AppTheme{
-  static ThemeData get light{
-    final colorScheme = ColorScheme.light(
-      primary: const Color(0xFF2F5233),        // verde bosque
-      secondary: const Color(0xFFE8A33D),      // mostaza
-      surface: const Color(0xFFFFFFFF),
+class AppTheme {
+  static ThemeData light(Color colorPrimario) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: colorPrimario,
+      brightness: Brightness.light,
+      secondary: const Color(0xFFE8A33D), // si quieres mantener tu mostaza fijo, puedes seguir forzándolo aparte
     );
 
     return ThemeData(
