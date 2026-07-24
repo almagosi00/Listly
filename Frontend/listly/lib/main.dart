@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/theme/app_theme.dart';
 import 'package:listly/ui/ui_listas.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Listly',
       theme: AppTheme.light(Color(0xFF2F5233)),
-  debugShowCheckedModeBanner: true, //Cinta del debug
+      debugShowCheckedModeBanner: true, //Cinta del debug
       home: const ListasPage(tituloPage: "Demo Listly"),
     );
   }
