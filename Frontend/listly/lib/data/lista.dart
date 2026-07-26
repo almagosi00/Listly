@@ -36,6 +36,10 @@ class Lista{
   void toggleElemento({required int id}){
     this._elementos[id]!.toggleTachado();
   }
+
+  void cambiarOrdenElemento({required int idElemento, required int nuevoOrden}){
+    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);
+  }
   
   List<Elemento> get elementos{
     List<Elemento> l = this._elementos.values.toList();

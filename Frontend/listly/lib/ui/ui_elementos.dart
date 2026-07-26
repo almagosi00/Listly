@@ -39,27 +39,35 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
             child: ReorderableListView(
               padding: const EdgeInsets.all(AppSizes.paddingListaView),
               onReorderItem: (oldIndex, newIndex) {
-                setState(() {
-                  this._elementos[oldIndex].cambiarOrden(newIndex);
-                  if (oldIndex < newIndex){
-                    for ( int i = oldIndex+1; i <= newIndex; i++){
-                      this._elementos[i].cambiarOrden(this._elementos[i].orden-1);
-                    }
+                ref.read(listasProvider.notifier).cambiarOrdenElementos(
+                  idLista: widget.idLista, 
+                  idElemento: this._elementos[oldIndex].id, 
+                  nuevoOrden: newIndex
+                );
+                if (oldIndex < newIndex){
+                  for ( int i = oldIndex+1; i <= newIndex; i++){
+                    ref.read(listasProvider.notifier).cambiarOrdenElementos(
+                      idLista: widget.idLista, 
+                      idElemento: this._elementos[i].id, 
+                      nuevoOrden: this._elementos[i].orden-1
+                    );
                   }
-                  else{
-                    for ( int i = newIndex; i < oldIndex; i++){
-                      this._elementos[i].cambiarOrden(this._elementos[i].orden+1);
-                    }
+                }
+                else{
+                  for ( int i = newIndex; i < oldIndex; i++){
+                    ref.read(listasProvider.notifier).cambiarOrdenElementos(
+                      idLista: widget.idLista, 
+                      idElemento: this._elementos[i].id, 
+                      nuevoOrden: this._elementos[i].orden+1
+                    );
                   }
-                });
+                }
               },
               children: this._elementos.map((elemento) => _ElememtoCard(
                 key: ValueKey(elemento.id),
                 elemento: elemento,
                 onTap: () {
-                  setState(() {                    
-                    elemento.toggleTachado();
-                  });
+                  ref.read(listasProvider.notifier).toogleElementoTachado(idLista: widget.idLista, idElemento: elemento.id);
                 },
                 )).toList(),
             ),
