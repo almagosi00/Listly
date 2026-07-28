@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'listas_notifier.dart';
+part of 'usuario_notifier.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,51 +9,51 @@ part of 'listas_notifier.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(ListasNotifier)
-final listasProvider = ListasNotifierProvider._();
+@ProviderFor(UsuarioNotifier)
+final usuarioProvider = UsuarioNotifierProvider._();
 
-final class ListasNotifierProvider
-    extends $NotifierProvider<ListasNotifier, Map<int, Lista>> {
-  ListasNotifierProvider._()
+final class UsuarioNotifierProvider
+    extends $NotifierProvider<UsuarioNotifier, Usuario> {
+  UsuarioNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'listasProvider',
+        name: r'usuarioProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$listasNotifierHash();
+  String debugGetCreateSourceHash() => _$usuarioNotifierHash();
 
   @$internal
   @override
-  ListasNotifier create() => ListasNotifier();
+  UsuarioNotifier create() => UsuarioNotifier();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Map<int, Lista> value) {
+  Override overrideWithValue(Usuario value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<Map<int, Lista>>(value),
+      providerOverride: $SyncValueProvider<Usuario>(value),
     );
   }
 }
 
-String _$listasNotifierHash() => r'7b8ca7a21cb78ea790a612d1a357de1cabe7ce5c';
+String _$usuarioNotifierHash() => r'72ac1f44219d52d778fe81db6b644db9076131b5';
 
-abstract class _$ListasNotifier extends $Notifier<Map<int, Lista>> {
-  Map<int, Lista> build();
+abstract class _$UsuarioNotifier extends $Notifier<Usuario> {
+  Usuario build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<Map<int, Lista>, Map<int, Lista>>;
+    final ref = this.ref as $Ref<Usuario, Usuario>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<Map<int, Lista>, Map<int, Lista>>,
-              Map<int, Lista>,
+              AnyNotifier<Usuario, Usuario>,
+              Usuario,
               Object?,
               Object?
             >;

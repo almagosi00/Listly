@@ -1,4 +1,5 @@
 import 'package:listly/data/lista.dart';
+import 'package:listly/data/usuario.dart';
 import 'package:listly/mock_data.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,6 +12,13 @@ class ListasNotifier extends _$ListasNotifier{
     Map<int,Lista> build() {
     final List<Lista> listas = mockData();
         return Map.unmodifiable({for (Lista l in listas) l.id: l});
+    }
+
+    // ## Elementos
+
+    void addElemento({required int idLista, required Usuario usuarioCreador, required String nombre, required String? emoji}){
+      state[idLista]!.addElemento(nombre: nombre, creador: usuarioCreador, emoji: emoji);
+      state = Map.unmodifiable({...state});
     }
 
     void toogleElementoTachado({required int idLista, required idElemento}){

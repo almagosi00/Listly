@@ -13,6 +13,8 @@ class Lista{
   final Map<int,Elemento> _elementos = Map();
   final List<RolLista> _rolesLista=[];
 
+  int _idSiguienteElemento = 0;
+
   Lista({required this._nombre, required this._id, required Usuario usuarioPropietario, this._emoji = ""})
   {
     _rolesLista.add(RolLista(rol: Rol.propietario, usuario: usuarioPropietario));
@@ -25,8 +27,10 @@ class Lista{
 
   // ## Métodos Elementos
 
-  void addElemento({required Elemento elemento}){
-    this._elementos[elemento.id] = elemento;
+  void addElemento({required String nombre, String? emoji, required Usuario creador}){
+    int idElemento = this._idSiguienteElemento++;
+    this._elementos[idElemento] = Elemento(id: idElemento, orden: this._elementos.length, nombre: nombre, creador: creador, emoji: emoji);
+    
     this._modificacion = DateTime.now();
   }
 

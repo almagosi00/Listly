@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/data/elemento.dart';
 import 'package:listly/data/lista.dart';
 import 'package:listly/notifier/listas_notifier.dart';
+import 'package:listly/notifier/usuario_notifier.dart';
 import 'package:listly/theme/app_color.dart';
 import 'package:listly/theme/app_sizer.dart';
 
@@ -78,6 +79,10 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _mostrarDialogoNuevoElemento(context),
+        child: const Icon(Icons.add),
+      ),
     );
 
   }
@@ -135,16 +140,16 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
-            ),
-            TextButton(
               onPressed: () {
                 ref.read(listasProvider.notifier).modifyElementoNombre(idLista: widget.idLista, idElemento: elemento.id, nombre: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
-            )
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
           ],
         );
       }
@@ -165,12 +170,59 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           ),
           actions: [
             TextButton(
+              onPressed: () {
+                ref.read(listasProvider.notifier).modifyElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emoji: controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar')
+            ),            
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  void _mostrarDialogoNuevoElemento(BuildContext context){
+    final TextEditingController controllerEmoji = TextEditingController();    
+    final TextEditingController controllerNombre = TextEditingController();
+
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Modificar Emoji'),
+          content: Column(
+            children: [
+              TextField(
+                controller: controllerEmoji,
+                decoration: const InputDecoration(labelText: 'Emoji'),
+              ),
+              const SizedBox(height: AppSizes.heightAlertDialog),
+              TextField(
+                controller: controllerNombre,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
             ),
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emoji: controller.text);
+
+                ref.read(listasProvider.notifier).addElemento(
+                  idLista: widget.idLista, 
+                  usuarioCreador: ref.read(usuarioProvider), 
+                  nombre: controllerNombre.text, 
+                  emoji: controllerEmoji.text
+                );
+
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
