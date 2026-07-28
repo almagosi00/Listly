@@ -18,6 +18,14 @@ class Elemento{
     this._orden = orden;
   }
 
+  void cambiarNombre(String nombre){
+    this._nombre = nombre;
+  }
+
+  void cambiarEmoji(String emoji){
+    this._emoji = emoji;
+  }
+
   String get nombre => this._nombre;
   String get emoji => this._emoji;
   bool get tachado => this._tachado;

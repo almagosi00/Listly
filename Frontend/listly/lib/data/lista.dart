@@ -18,27 +18,48 @@ class Lista{
     _rolesLista.add(RolLista(rol: Rol.propietario, usuario: usuarioPropietario));
   }
 
+  void addMiembro({required Usuario usuario, required Rol rol}){
+    this._rolesLista.add(RolLista(rol: rol, usuario: usuario));
+    this._modificacion = DateTime.now();
+  }
+
+  // ## Métodos Elementos
+
   void addElemento({required Elemento elemento}){
     this._elementos[elemento.id] = elemento;
     this._modificacion = DateTime.now();
   }
 
   void removeElemento({required int id}){
-    this._elementos.remove(id);
-    this._modificacion = DateTime.now();
-  }
+    Elemento ele = this._elementos.remove(id)!;
 
-  void addMiembro({required Usuario usuario, required Rol rol}){
-    this._rolesLista.add(RolLista(rol: rol, usuario: usuario));
+    this.elementos.forEach((elemento) {
+      if(elemento.orden > ele.orden){
+        elemento.cambiarOrden(elemento.orden-1);
+      }
+    });
+    
     this._modificacion = DateTime.now();
   }
 
   void toggleElemento({required int id}){
     this._elementos[id]!.toggleTachado();
+    this._modificacion = DateTime.now();
   }
 
   void cambiarOrdenElemento({required int idElemento, required int nuevoOrden}){
-    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);
+    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);    
+    this._modificacion = DateTime.now();
+  }
+
+  void modifyElementoNombre({required int idElemento, required String nombre}){
+    this._elementos[idElemento]!.cambiarNombre(nombre);    
+    this._modificacion = DateTime.now();
+  }
+
+  void modifyElementoEmoji({required int idElemento, required String emoji}){
+    this._elementos[idElemento]!.cambiarEmoji(emoji);   
+    this._modificacion = DateTime.now();
   }
   
   List<Elemento> get elementos{

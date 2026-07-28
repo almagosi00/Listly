@@ -69,6 +69,9 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
                 onTap: () {
                   ref.read(listasProvider.notifier).toogleElementoTachado(idLista: widget.idLista, idElemento: elemento.id);
                 },
+                onOpciones: () {
+                  _mostrarOpciones(context, elemento);
+                },
                 )).toList(),
             ),
           ),
@@ -78,6 +81,105 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
     );
 
   }
+
+
+  void _mostrarOpciones(BuildContext context, Elemento elemento){
+    showModalBottomSheet(
+      context: context, 
+      builder: (context){
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Modificar Icono'),
+              onTap: () {
+                Navigator.pop(context);
+                _mostrarDialogoEmoji(context, elemento);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Moficiar Nombre'),
+              onTap: () {
+                Navigator.pop(context);
+                _mostrarDialogoNombre(context, elemento);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Eliminar'),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(listasProvider.notifier).eliminarElemento(idLista: widget.idLista, idElemento: elemento.id);
+              },
+            ),
+          ], 
+        );
+      }
+    );
+  }
+  
+
+  void _mostrarDialogoNombre(BuildContext context, Elemento elemento){
+    final TextEditingController controller = TextEditingController(text: elemento.nombre);
+
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Modificar Nombre'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(listasProvider.notifier).modifyElementoNombre(idLista: widget.idLista, idElemento: elemento.id, nombre: controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar')
+            )
+          ],
+        );
+      }
+    );
+  }
+
+  void _mostrarDialogoEmoji(BuildContext context, Elemento elemento){
+    final TextEditingController controller = TextEditingController(text: elemento.emoji);
+
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Modificar Emoji'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(listasProvider.notifier).modifyElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emoji: controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar')
+            )
+          ],
+        );
+      }
+    );
+  }
   
 }
 
@@ -85,8 +187,9 @@ class _ElememtoCard extends StatelessWidget{
 
   final Elemento _elemento;
   final VoidCallback _onTap;
+  final VoidCallback _onOpciones;
 
-  const _ElememtoCard({super.key, required this._elemento, required this._onTap});
+  const _ElememtoCard({super.key, required this._elemento, required this._onTap, required this._onOpciones});
 
   @override
   Widget build(BuildContext context) {
@@ -142,9 +245,14 @@ class _ElememtoCard extends StatelessWidget{
                   ],
                 ),
               ),
-
-              const Icon(
-                Icons.more_vert
+              
+              const SizedBox(width: AppSizes.widthCardSizeBoxRow),
+              
+              IconButton(
+                onPressed: this._onOpciones, 
+                icon: const Icon(
+                  Icons.more_vert,
+                ),
               )
             ],
           ),
@@ -152,5 +260,6 @@ class _ElememtoCard extends StatelessWidget{
       ),
     );
   }
+
   
 }

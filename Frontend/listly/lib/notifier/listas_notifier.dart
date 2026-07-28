@@ -22,4 +22,19 @@ class ListasNotifier extends _$ListasNotifier{
       state[idLista]!.cambiarOrdenElemento(idElemento: idElemento, nuevoOrden: nuevoOrden);
       state = Map.unmodifiable({...state});
     }
+
+    void eliminarElemento({required int idLista, required int idElemento}){
+      state[idLista]!.removeElemento(id: idElemento);
+      state = Map.unmodifiable({...state});
+    }
+
+    void modifyElementoNombre({required int idLista, required int idElemento, required String nombre}){
+      state[idLista]!.modifyElementoNombre(idElemento: idElemento, nombre: nombre);      
+      state = Map.unmodifiable({...state});
+    }
+
+    void modifyElementoEmoji({required int idLista, required int idElemento, required String emoji}){
+      state[idLista]!.modifyElementoEmoji(idElemento: idElemento, emoji: emoji);      
+      state = Map.unmodifiable({...state});
+    }
 }
