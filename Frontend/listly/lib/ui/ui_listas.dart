@@ -87,10 +87,15 @@ class _ListaPageState extends ConsumerState<ListasPage>{
                     MaterialPageRoute(builder: (context) => ElementosPage(idLista: lista.id,))
                   );
                 },
+                onOpciones: () => this._mostrarOpciones(context, lista),
                 )).toList(),
           ))
         ],
-      )
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _mostrarDialogoNuevoElemento(context),
+        child: const Icon(Icons.add),
+      ),
     );
   }
   
@@ -115,6 +120,151 @@ class _ListaPageState extends ConsumerState<ListasPage>{
     }
   }
 
+  void _mostrarOpciones(BuildContext context, Lista lista){
+    showModalBottomSheet(
+      context: context, 
+      builder: (context){
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Modificar Icono'),
+              onTap: () {
+                Navigator.pop(context);
+                _mostrarDialogoEmoji(context, lista);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Moficiar Nombre'),
+              onTap: () {
+                Navigator.pop(context);
+                _mostrarDialogoNombre(context, lista);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Eliminar'),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(listasProvider.notifier).eliminarLista(idLista: lista.id);
+              },
+            ),
+          ], 
+        );
+      }
+    );
+  }
+  
+
+  void _mostrarDialogoNombre(BuildContext context, Lista lista){ 
+    final TextEditingController controller = TextEditingController(text: lista.nombre);
+
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Modificar Nombre'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                ref.read(listasProvider.notifier).modifyListaNombre(idLista: lista.id, nombre: controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar')
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  void _mostrarDialogoEmoji(BuildContext context, Lista lista){
+    final TextEditingController controller = TextEditingController(text: lista.emoji);
+
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Modificar Emoji'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                ref.read(listasProvider.notifier).modifyListaNombre(idLista: lista.id, nombre: controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar')
+            ),            
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+
+
+  void _mostrarDialogoNuevoElemento(BuildContext context){
+    final TextEditingController controllerEmoji = TextEditingController();    
+    final TextEditingController controllerNombre = TextEditingController();
+
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Añadir lista'),
+          content: Column(
+            children: [
+              TextField(
+                controller: controllerEmoji,
+                decoration: const InputDecoration(labelText: 'Emoji'),
+              ),
+              const SizedBox(height: AppSizes.heightAlertDialog),
+              TextField(
+                controller: controllerNombre,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red),),
+            ),
+            TextButton(
+              onPressed: () {
+
+                ref.read(listasProvider.notifier).addLista(
+                  nombre: controllerNombre.text, 
+                  emoji: controllerEmoji.text
+                );
+
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar')
+            )
+          ],
+        );
+      }
+    );
+  }
+
 }
 
 
@@ -122,8 +272,9 @@ class _ListaCard extends StatelessWidget{
 
   final Lista _lista;
   final VoidCallback _onTap;
+  final VoidCallback _onOpciones;
 
-  const _ListaCard({super.key, required this._lista, required this._onTap});
+  const _ListaCard({super.key, required this._lista, required this._onTap, required this._onOpciones});
 
   @override
   Widget build(BuildContext context) {
@@ -155,8 +306,11 @@ class _ListaCard extends StatelessWidget{
                 ),
               ),
 
-              const Icon(
-                Icons.more_vert
+              IconButton(
+                onPressed: this._onOpciones, 
+                icon: const Icon(
+                  Icons.more_vert,
+                ),
               )
 
             ],

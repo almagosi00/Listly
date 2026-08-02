@@ -1,6 +1,7 @@
 import 'package:listly/data/lista.dart';
 import 'package:listly/data/usuario.dart';
-import 'package:listly/mock_data.dart';
+import 'package:listly/notifier/repository.dart';
+import 'package:listly/notifier/usuario_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'listas_notifier.g.dart';
@@ -10,14 +11,41 @@ class ListasNotifier extends _$ListasNotifier{
 
     @override
     Map<int,Lista> build() {
-    final List<Lista> listas = mockData();
-        return Map.unmodifiable({for (Lista l in listas) l.id: l});
+      return Map.unmodifiable(ref.read(repositoryProvider).listas);
+    }
+
+    // ## Listas
+
+    void addLista({required String nombre, required String emoji}){
+      int idLista = ref.read(repositoryProvider).getIdLista();
+      state = Map.unmodifiable({...state, idLista: Lista(
+        id: idLista,
+        nombre: nombre, 
+        emoji: emoji, 
+        usuarioPropietario: ref.read(usuarioProvider)
+        )});
+    }
+
+    void eliminarLista({required int idLista}){
+      Map<int, Lista> copia = Map<int, Lista>.of(state);
+      copia.remove(idLista);
+      state = Map.unmodifiable(copia);
+    }
+
+    void modifyListaEmoji({required int idLista, required String emoji}){
+      state[idLista]!.modifyEmoji(emoji: emoji);
+      state = Map.unmodifiable({...state});
+    }
+
+    void modifyListaNombre({required int idLista, required String nombre}){
+      state[idLista]!.modifyNombre(nombre: nombre);
+      state = Map.unmodifiable({...state});
     }
 
     // ## Elementos
 
     void addElemento({required int idLista, required Usuario usuarioCreador, required String nombre, required String? emoji}){
-      state[idLista]!.addElemento(nombre: nombre, creador: usuarioCreador, emoji: emoji);
+      state[idLista]!.addElemento(nombre: nombre, creador: usuarioCreador, emoji: emoji, idElemento: ref.read(repositoryProvider).getIdElemento());
       state = Map.unmodifiable({...state});
     }
 

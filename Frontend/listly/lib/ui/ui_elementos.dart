@@ -194,7 +194,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
       context: context, 
       builder: (context) {
         return AlertDialog(
-          title: const Text('Modificar Emoji'),
+          title: const Text('Añadir elemento'),
           content: Column(
             children: [
               TextField(

@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:listly/data/usuario.dart';
 import 'package:listly/data/elemento.dart';
 import 'package:listly/data/rol.dart';
 import 'package:listly/data/rol_lista.dart';
+import 'package:listly/notifier/repository.dart';
 
 class Lista{
   int _id;
@@ -13,8 +15,6 @@ class Lista{
   final Map<int,Elemento> _elementos = Map();
   final List<RolLista> _rolesLista=[];
 
-  int _idSiguienteElemento = 0;
-
   Lista({required this._nombre, required this._id, required Usuario usuarioPropietario, this._emoji = ""})
   {
     _rolesLista.add(RolLista(rol: Rol.propietario, usuario: usuarioPropietario));
@@ -25,10 +25,19 @@ class Lista{
     this._modificacion = DateTime.now();
   }
 
+  void modifyEmoji({required String emoji}){
+    this._emoji = emoji;
+    this._modificacion = DateTime.now();
+  }
+
+  void modifyNombre({required String nombre}){
+    this._nombre = nombre;
+    this._modificacion = DateTime.now();
+  }
+
   // ## Métodos Elementos
 
-  void addElemento({required String nombre, String? emoji, required Usuario creador}){
-    int idElemento = this._idSiguienteElemento++;
+  void addElemento({required String nombre, String? emoji, required Usuario creador, required int idElemento}){
     this._elementos[idElemento] = Elemento(id: idElemento, orden: this._elementos.length, nombre: nombre, creador: creador, emoji: emoji);
     
     this._modificacion = DateTime.now();
