@@ -22,8 +22,34 @@ class _ListaPageState extends ConsumerState<ListasPage>{
 
   @override
   Widget build(BuildContext context) {
+    final AsyncValue<Map<int, Lista>> listasAsync = ref.watch(listasProvider);
 
-    this._listas = ref.watch(listasProvider).values.toList();
+    return listasAsync.when(
+      data: (data) => _pantallaPrincipal(data), 
+      error: (error, stackTrace) => _pantallaError(error, stackTrace), 
+      loading: () => _pantallaCargando(),
+    );    
+  }
+
+  Widget _pantallaCargando(){
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _pantallaError(Object error, StackTrace stackTrace){
+    print('\n\n ERROR: $error  \n\n STACKTRACE: $stackTrace');
+    return Scaffold(
+      body: Center(
+        child: Text('Error al cargar las listas: ${error}'),
+      ),
+    );
+  }
+
+  Widget _pantallaPrincipal(Map<int, Lista> mapaListas){
+    this._listas = mapaListas.values.toList();
     this._filtrarLista();
     this._ordenarViewLista();
     

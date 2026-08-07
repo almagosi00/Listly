@@ -13,7 +13,7 @@ part of 'usuario_notifier.dart';
 final usuarioProvider = UsuarioNotifierProvider._();
 
 final class UsuarioNotifierProvider
-    extends $NotifierProvider<UsuarioNotifier, Usuario> {
+    extends $AsyncNotifierProvider<UsuarioNotifier, Usuario> {
   UsuarioNotifierProvider._()
     : super(
         from: null,
@@ -31,29 +31,21 @@ final class UsuarioNotifierProvider
   @$internal
   @override
   UsuarioNotifier create() => UsuarioNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Usuario value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Usuario>(value),
-    );
-  }
 }
 
-String _$usuarioNotifierHash() => r'72ac1f44219d52d778fe81db6b644db9076131b5';
+String _$usuarioNotifierHash() => r'fdb9d8d419d8db3bde6263a006c05ea10b48d23d';
 
-abstract class _$UsuarioNotifier extends $Notifier<Usuario> {
-  Usuario build();
+abstract class _$UsuarioNotifier extends $AsyncNotifier<Usuario> {
+  FutureOr<Usuario> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<Usuario, Usuario>;
+    final ref = this.ref as $Ref<AsyncValue<Usuario>, Usuario>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<Usuario, Usuario>,
-              Usuario,
+              AnyNotifier<AsyncValue<Usuario>, Usuario>,
+              AsyncValue<Usuario>,
               Object?,
               Object?
             >;

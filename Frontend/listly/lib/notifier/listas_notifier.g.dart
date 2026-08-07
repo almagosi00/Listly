@@ -13,7 +13,7 @@ part of 'listas_notifier.dart';
 final listasProvider = ListasNotifierProvider._();
 
 final class ListasNotifierProvider
-    extends $NotifierProvider<ListasNotifier, Map<int, Lista>> {
+    extends $AsyncNotifierProvider<ListasNotifier, Map<int, Lista>> {
   ListasNotifierProvider._()
     : super(
         from: null,
@@ -31,29 +31,21 @@ final class ListasNotifierProvider
   @$internal
   @override
   ListasNotifier create() => ListasNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Map<int, Lista> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Map<int, Lista>>(value),
-    );
-  }
 }
 
-String _$listasNotifierHash() => r'7b8ca7a21cb78ea790a612d1a357de1cabe7ce5c';
+String _$listasNotifierHash() => r'e0e744750f606ace81396166bb677f61a74e4571';
 
-abstract class _$ListasNotifier extends $Notifier<Map<int, Lista>> {
-  Map<int, Lista> build();
+abstract class _$ListasNotifier extends $AsyncNotifier<Map<int, Lista>> {
+  FutureOr<Map<int, Lista>> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<Map<int, Lista>, Map<int, Lista>>;
+    final ref = this.ref as $Ref<AsyncValue<Map<int, Lista>>, Map<int, Lista>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<Map<int, Lista>, Map<int, Lista>>,
-              Map<int, Lista>,
+              AnyNotifier<AsyncValue<Map<int, Lista>>, Map<int, Lista>>,
+              AsyncValue<Map<int, Lista>>,
               Object?,
               Object?
             >;

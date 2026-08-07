@@ -8,8 +8,9 @@ part 'usuario_notifier.g.dart';
 class UsuarioNotifier extends _$UsuarioNotifier{
 
   @override
-  Usuario build() {
-    return ref.read(repositoryProvider).usuario;
+  Future<Usuario> build() async {
+    final repo = await ref.watch(repositoryProvider.future);
+    return repo.usuario;
   }
 
 }

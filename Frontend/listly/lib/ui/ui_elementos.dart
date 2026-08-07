@@ -25,7 +25,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
   @override
   Widget build(BuildContext context) {
 
-    this._lista = ref.watch(listasProvider)[widget.idLista]!;
+    this._lista = ref.watch(listasProvider).requireValue[widget.idLista]!;
     this._elementos = this._lista.elementos;
 
     return Scaffold(
@@ -218,7 +218,6 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
 
                 ref.read(listasProvider.notifier).addElemento(
                   idLista: widget.idLista, 
-                  usuarioCreador: ref.read(usuarioProvider), 
                   nombre: controllerNombre.text, 
                   emoji: controllerEmoji.text
                 );

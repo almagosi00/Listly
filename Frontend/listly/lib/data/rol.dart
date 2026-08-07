@@ -8,4 +8,8 @@ enum Rol{
   final int permiso;
 
   const Rol(this.nombre,this.permiso);
+
+  String toJson() => this.name;
+
+  static Rol fromJson(String json) => Rol.values.byName(json);
 }
