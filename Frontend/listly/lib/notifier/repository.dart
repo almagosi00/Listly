@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 class Repository{
 
-  final bool usarDatosMock = false;
+  final bool usarDatosMock = true;
 
   int _ultimoIdLista = 0;
   int _ultimoIdElemento = 0;

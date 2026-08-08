@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/data/lista.dart';
-import 'package:listly/data/usuario.dart';
 import 'package:listly/notifier/repository.dart';
-import 'package:listly/notifier/usuario_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'listas_notifier.g.dart';
