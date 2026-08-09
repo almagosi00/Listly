@@ -37,7 +37,27 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
         child: Column(
           children: [
             Expanded(
-              child: ReorderableListView(
+              child: _elementos.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.checklist, size: AppSizes.vacioIconSize, color: AppColor.colorVacio,),
+                    const SizedBox(height: AppSizes.vacioEspacioSuperior),
+                    const Text(
+                      'Esta lista está vacía',
+                      style: TextStyle(fontSize: AppSizes.vacioFuenteTamanoSuperior, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppSizes.vacioEspacioInferior),
+                    const Text(
+                      'Toca el botón + para añadir el primer elemento',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColor.colorVacio),
+                    ),
+                  ],
+                ),
+              )              
+              : ReorderableListView(
                 padding: const EdgeInsets.all(AppSizes.paddingListaView),
                 onReorderItem: (oldIndex, newIndex) {
                   ref.read(listasProvider.notifier).cambiarOrdenElementos(

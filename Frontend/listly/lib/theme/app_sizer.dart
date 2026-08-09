@@ -16,4 +16,9 @@ class AppSizes{
   static const double sizeStackIconLista = 42;
   
   static const double heightAlertDialog = 23;
+
+  static const double vacioIconSize = 64;
+  static const double vacioEspacioSuperior = 16;
+  static const double vacioEspacioInferior = 8;
+  static const double vacioFuenteTamanoSuperior = 18;
 }

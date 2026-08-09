@@ -103,20 +103,43 @@ class _ListaPageState extends ConsumerState<ListasPage>{
                 ],
               ),
             ),
-            Expanded(child: ListView(
-              padding: const EdgeInsets.all(AppSizes.paddingListaView),
-              children:
-                this._listas.map((lista) => _ListaCard(
-                  lista: lista,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ElementosPage(idLista: lista.id,))
-                    );
-                  },
-                  onOpciones: () => this._mostrarOpciones(context, lista),
-                  )).toList(),
-            ))
+            Expanded(child: 
+              _listas.isEmpty 
+              ?
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.checklist, size: AppSizes.vacioIconSize, color: AppColor.colorVacio,),
+                    const SizedBox(height: AppSizes.vacioEspacioSuperior),
+                    const Text(
+                      'No hay listas',
+                      style: TextStyle(fontSize: AppSizes.vacioFuenteTamanoSuperior, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppSizes.vacioEspacioInferior),
+                    const Text(
+                      'Toca el botón + para añadir la primera lista',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColor.colorVacio),
+                    ),
+                  ],
+                ),
+              )
+              :  ListView(
+                  padding: const EdgeInsets.all(AppSizes.paddingListaView),
+                  children:
+                    this._listas.map((lista) => _ListaCard(
+                      lista: lista,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ElementosPage(idLista: lista.id,))
+                        );
+                      },
+                      onOpciones: () => this._mostrarOpciones(context, lista),
+                      )).toList(),
+                )
+            )
           ],
         ),
       ),
