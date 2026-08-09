@@ -84,6 +84,8 @@ class RepositoryNotifier extends _$RepositoryNotifier{
       usuarios: usuariosMapa
     ));
     _guardarDatos();
+    
+    print("\n\n\n actualizarState \n\n\n");
   }
 
   //## Archivo data.json

@@ -9,7 +9,7 @@ import 'package:listly/theme/app_sizer.dart';
 
 class ElementosPage extends ConsumerStatefulWidget{
 
-  int idLista;
+  final int idLista;
 
   ElementosPage({super.key, required this.idLista});
   
@@ -25,13 +25,17 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
   @override
   Widget build(BuildContext context) {
 
-    //this._lista = ref.watch(listasProvider).requireValue[widget.idLista]!;
+    print("\n\n\n ELEMENTOS builder \n\n\n");
+
     final mapaElementosAsync = ref.watch(repositoryProvider.select(
-      (async) => async.whenData((appState) => appState.listas[widget.idLista]!),
+      (async) => async.whenData((appState) {
+        final lista = appState.listas[widget.idLista]!;
+        return (lista: lista, modificacion : lista.modificacion);
+      }),
     ));
     
     return mapaElementosAsync.when(
-      data: (data) => _pantallaPrincipal(data), 
+      data: (data) => _pantallaPrincipal(data.lista), 
       error: (error, stackTrace) => _pantallaError(error, stackTrace), 
       loading: () => _pantallaCargando(),
     );   
@@ -57,11 +61,17 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
   Widget _pantallaPrincipal(Lista lista){
     this._elementos = lista.elementos;
 
+    for( Elemento elemento in _elementos){
+      print(" \n\n\n ${elemento.nombre} - ${elemento.orden}");
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.pop(context), 
-          icon: const Icon(Icons.arrow_back))
+          icon: const Icon(Icons.arrow_back)
+        ),
+        title: Text(lista.nombre),
       ),
       body: SafeArea(
         child: Column(

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:listly/data/usuario.dart';
 import 'package:listly/data/elemento.dart';
 import 'package:listly/data/rol.dart';
@@ -47,11 +46,11 @@ class Lista{
   void removeElemento({required int id}){
     Elemento ele = this._elementos.remove(id)!;
 
-    this.elementos.forEach((elemento) {
+    for( Elemento elemento in _elementos.values){
       if(elemento.orden > ele.orden){
-        elemento.cambiarOrden(elemento.orden-1);
+        elemento.cambiarOrden(elemento.orden - 1);
       }
-    });
+    }
     
     this._modificacion = DateTime.now();
   }
@@ -62,22 +61,22 @@ class Lista{
   }
 
   void cambiarOrdenElemento({required int idElemento, required int antiguoOrden, required int nuevoOrden}){
-    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);   
 
     if (antiguoOrden < nuevoOrden){
       _elementos.forEach((idElemento, elemento) {
-        if(antiguoOrden < elemento.orden && elemento.orden < nuevoOrden){
+        if(antiguoOrden < elemento.orden && elemento.orden <= nuevoOrden){
           elemento.cambiarOrden(elemento.orden-1);
         }
       });
     }
     else{
       _elementos.forEach((idElemento, elemento) {
-        if(nuevoOrden < elemento.orden && elemento.orden < antiguoOrden){
+        if(nuevoOrden <= elemento.orden && elemento.orden < antiguoOrden){
           elemento.cambiarOrden(elemento.orden+1);
         }
       });
     }
+    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);   
 
     this._modificacion = DateTime.now();
   }

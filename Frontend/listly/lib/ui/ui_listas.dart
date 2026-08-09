@@ -23,6 +23,9 @@ class _ListaPageState extends ConsumerState<ListasPage>{
 
   @override
   Widget build(BuildContext context) {
+    
+    print("\n\n\n LISTAS builder \n\n\n");
+
     final  mapaListasAsync = ref.watch(repositoryProvider.select(
       (async) => async.whenData((appState) => appState.listas)
     ));
