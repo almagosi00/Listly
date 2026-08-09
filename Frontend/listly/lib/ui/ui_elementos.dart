@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/data/elemento.dart';
 import 'package:listly/data/lista.dart';
-import 'package:listly/notifier/listas_notifier.dart';
+import 'package:listly/notifier/repository_notifier.dart';
 import 'package:listly/theme/app_color.dart';
 import 'package:listly/theme/app_sizer.dart';
+
 
 class ElementosPage extends ConsumerStatefulWidget{
 
@@ -18,14 +19,43 @@ class ElementosPage extends ConsumerStatefulWidget{
 
 class _ElementosPageState extends ConsumerState<ElementosPage>{
   
-  late Lista _lista;
+  //late Lista _lista;
   late List<Elemento> _elementos;
 
   @override
   Widget build(BuildContext context) {
 
-    this._lista = ref.watch(listasProvider).requireValue[widget.idLista]!;
-    this._elementos = this._lista.elementos;
+    //this._lista = ref.watch(listasProvider).requireValue[widget.idLista]!;
+    final mapaElementosAsync = ref.watch(repositoryProvider.select(
+      (async) => async.whenData((appState) => appState.listas[widget.idLista]!),
+    ));
+    
+    return mapaElementosAsync.when(
+      data: (data) => _pantallaPrincipal(data), 
+      error: (error, stackTrace) => _pantallaError(error, stackTrace), 
+      loading: () => _pantallaCargando(),
+    );   
+  }
+
+  Widget _pantallaCargando(){
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _pantallaError(Object error, StackTrace stackTrace){
+    print('\n\n ERROR: $error  \n\n STACKTRACE: $stackTrace');
+    return Scaffold(
+      body: Center(
+        child: Text('Error al cargar la lista: ${error}'),
+      ),
+    );
+  }
+
+  Widget _pantallaPrincipal(Lista lista){
+    this._elementos = lista.elementos;
 
     return Scaffold(
       appBar: AppBar(
@@ -60,35 +90,20 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
               : ReorderableListView(
                 padding: const EdgeInsets.all(AppSizes.paddingListaView),
                 onReorderItem: (oldIndex, newIndex) {
-                  ref.read(listasProvider.notifier).cambiarOrdenElementos(
-                    idLista: widget.idLista, 
-                    idElemento: this._elementos[oldIndex].id, 
-                    nuevoOrden: newIndex
-                  );
-                  if (oldIndex < newIndex){
-                    for ( int i = oldIndex+1; i <= newIndex; i++){
-                      ref.read(listasProvider.notifier).cambiarOrdenElementos(
-                        idLista: widget.idLista, 
-                        idElemento: this._elementos[i].id, 
-                        nuevoOrden: this._elementos[i].orden-1
-                      );
-                    }
-                  }
-                  else{
-                    for ( int i = newIndex; i < oldIndex; i++){
-                      ref.read(listasProvider.notifier).cambiarOrdenElementos(
-                        idLista: widget.idLista, 
-                        idElemento: this._elementos[i].id, 
-                        nuevoOrden: this._elementos[i].orden+1
-                      );
-                    }
+                  if(oldIndex != newIndex){
+                    ref.read(repositoryProvider.notifier).elementoCambiarOrden(
+                      idLista: widget.idLista, 
+                      idElemento: _elementos[oldIndex].id, 
+                      antiguoOrden: oldIndex, 
+                      nuevoOrden: newIndex
+                    );
                   }
                 },
                 children: this._elementos.map((elemento) => _ElememtoCard(
                   key: ValueKey(elemento.id),
                   elemento: elemento,
                   onTap: () {
-                    ref.read(listasProvider.notifier).toogleElementoTachado(idLista: widget.idLista, idElemento: elemento.id);
+                    ref.read(repositoryProvider.notifier).elementoToogleTachado(idLista: widget.idLista, idElemento: elemento.id);
                   },
                   onOpciones: () {
                     _mostrarOpciones(context, elemento);
@@ -105,7 +120,6 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
         child: const Icon(Icons.add),
       ),
     );
-
   }
 
 
@@ -164,7 +178,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyElementoNombre(idLista: widget.idLista, idElemento: elemento.id, nombre: controller.text);
+                ref.read(repositoryProvider.notifier).modificarElementoNombre(idLista: widget.idLista, idElemento: elemento.id, nombreElmento: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -194,7 +208,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emoji: controller.text);
+                ref.read(repositoryProvider.notifier).modificarElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emojiElemento: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -224,7 +238,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                ref.read(listasProvider.notifier).eliminarElemento(idLista: widget.idLista, idElemento: elemento.id);
+                ref.read(repositoryProvider.notifier).eliminarElemento(idLista: widget.idLista, idElemento: elemento.id);
               }, 
               child: const Text('Sí, eliminar', style: TextStyle(color: Colors.red),),
             ),
@@ -264,10 +278,10 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
             TextButton(
               onPressed: () {
 
-                ref.read(listasProvider.notifier).addElemento(
+                ref.read(repositoryProvider.notifier).crearElemento(
                   idLista: widget.idLista, 
-                  nombre: controllerNombre.text, 
-                  emoji: controllerEmoji.text
+                  nombreElemento: controllerNombre.text, 
+                  emojiElemento: controllerEmoji.text
                 );
 
                 Navigator.pop(context);

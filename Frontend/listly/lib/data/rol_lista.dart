@@ -3,23 +3,23 @@ import 'package:listly/data/rol.dart';
 
 class RolLista {
   Rol _rol;
-  final Usuario _usuario;
+  final int _usuarioId;
 
-  RolLista({required this._rol, required this._usuario});
+  RolLista({required this._rol, required this._usuarioId});
 
   Rol get rol => this._rol;
 
-  Usuario get usuario => this._usuario;
+  int get usuarioId => this._usuarioId;
 
   Map<String, dynamic> toJson() => {
     'rol': this._rol.toJson(),
-    'usuarioId': this._usuario.id,
+    'usuarioId': this._usuarioId,
   };
 
   factory RolLista.fromJson(Map<String, dynamic> json, Map<int, Usuario> usuariosConocidos){
     final RolLista rolLista = RolLista(
       rol: Rol.fromJson(json['rol']), 
-      usuario: usuariosConocidos[json['usuarioId'] as int]!
+      usuarioId: json['usuarioId'] as int
     );
     return rolLista;
   }

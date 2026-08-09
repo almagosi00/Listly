@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/data/lista.dart';
-import 'package:listly/notifier/listas_notifier.dart';
+import 'package:listly/notifier/repository_notifier.dart';
 import 'package:listly/theme/app_color.dart';
 import 'package:listly/theme/app_sizer.dart';
 import 'package:listly/ui/ui_elementos.dart';
+
 
 class ListasPage extends ConsumerStatefulWidget{
   final String tituloPage;
@@ -22,9 +23,11 @@ class _ListaPageState extends ConsumerState<ListasPage>{
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<Map<int, Lista>> listasAsync = ref.watch(listasProvider);
+    final  mapaListasAsync = ref.watch(repositoryProvider.select(
+      (async) => async.whenData((appState) => appState.listas)
+    ));
 
-    return listasAsync.when(
+    return mapaListasAsync.when(
       data: (data) => _pantallaPrincipal(data), 
       error: (error, stackTrace) => _pantallaError(error, stackTrace), 
       loading: () => _pantallaCargando(),
@@ -105,8 +108,7 @@ class _ListaPageState extends ConsumerState<ListasPage>{
             ),
             Expanded(child: 
               _listas.isEmpty 
-              ?
-              Center(
+              ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -226,7 +228,7 @@ class _ListaPageState extends ConsumerState<ListasPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyListaNombre(idLista: lista.id, nombre: controller.text);
+                ref.read(repositoryProvider.notifier).modificarListaNombre(idLista: lista.id, nombreLista: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -256,7 +258,7 @@ class _ListaPageState extends ConsumerState<ListasPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyListaNombre(idLista: lista.id, nombre: controller.text);
+                ref.read(repositoryProvider.notifier).modificarListaEmoji(idLista: lista.id, emojiLista: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -286,7 +288,7 @@ class _ListaPageState extends ConsumerState<ListasPage>{
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                ref.read(listasProvider.notifier).eliminarLista(idLista: lista.id);
+                ref.read(repositoryProvider.notifier).eliminarLista(idLista: lista.id);
               }, 
               child: const Text('Sí, eliminar', style: TextStyle(color: Colors.red),),
             ),
@@ -326,9 +328,9 @@ class _ListaPageState extends ConsumerState<ListasPage>{
             TextButton(
               onPressed: () {
 
-                ref.read(listasProvider.notifier).addLista(
-                  nombre: controllerNombre.text, 
-                  emoji: controllerEmoji.text
+                ref.read(repositoryProvider.notifier).crearLista(
+                  nombreLista: controllerNombre.text, 
+                  emojiLista: controllerEmoji.text
                 );
 
                 Navigator.pop(context);
