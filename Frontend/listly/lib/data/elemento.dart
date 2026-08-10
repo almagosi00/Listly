@@ -41,7 +41,7 @@ class Elemento{
     'orden': this._orden,
   };
 
-  factory Elemento.fromJson(Map<String, dynamic> json, Map<int, Usuario> usuariosConocidos){
+  factory Elemento.fromJson(Map<String, dynamic> json){
     final Elemento elemento = Elemento(
       id: json['id'] as int, 
       orden: json['orden'] as int, 

@@ -25,8 +25,6 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
   @override
   Widget build(BuildContext context) {
 
-    print("\n\n\n ELEMENTOS builder \n\n\n");
-
     final mapaElementosAsync = ref.watch(repositoryProvider.select(
       (async) => async.whenData((appState) {
         final lista = appState.listas[widget.idLista]!;

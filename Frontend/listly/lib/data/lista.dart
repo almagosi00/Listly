@@ -115,10 +115,10 @@ class Lista{
     'roles': this._rolesLista.map((e) => e.toJson()).toList(),
   };
 
-  factory Lista.fromJson(Map<String, dynamic> json, Map<int, Usuario> usuariosConocidos){
+  factory Lista.fromJson(Map<String, dynamic> json){
 
-    List<Elemento> elementos = (json['elementos'] as List).map((e) => Elemento.fromJson(e as Map<String, dynamic>, usuariosConocidos)).toList();
-    List<RolLista> roles = (json['roles'] as List).map((e) => RolLista.fromJson(e as Map<String, dynamic>, usuariosConocidos)).toList();
+    List<Elemento> elementos = (json['elementos'] as List).map((e) => Elemento.fromJson(e as Map<String, dynamic>)).toList();
+    List<RolLista> roles = (json['roles'] as List).map((e) => RolLista.fromJson(e as Map<String, dynamic>)).toList();
 
     final Lista lista = Lista(
       nombre: json['nombre'] as String, 

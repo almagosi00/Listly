@@ -16,7 +16,7 @@ class RolLista {
     'usuarioId': this._usuarioId,
   };
 
-  factory RolLista.fromJson(Map<String, dynamic> json, Map<int, Usuario> usuariosConocidos){
+  factory RolLista.fromJson(Map<String, dynamic> json){
     final RolLista rolLista = RolLista(
       rol: Rol.fromJson(json['rol']), 
       usuarioId: json['usuarioId'] as int

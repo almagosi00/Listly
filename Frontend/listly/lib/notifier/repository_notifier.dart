@@ -13,7 +13,7 @@ class _AppState{
   final Map<int, Usuario> _usuarios;
   final int _principalUsuarioID;
 
-  _AppState({required this._listas, required this._usuarios}) : this._principalUsuarioID = _usuarios.keys.first;
+  _AppState({required this._listas, required this._usuarios, required this._principalUsuarioID});
 
   Map<int, Lista> get listas => Map.unmodifiable(_listas);
   Map<int, Usuario> get usuarios => Map.unmodifiable(_usuarios);
@@ -22,6 +22,8 @@ class _AppState{
 
 @riverpod
 class RepositoryNotifier extends _$RepositoryNotifier{
+
+  static const versionData = 2;
 
   int _ultimoIdLista = 0;
   int _ultimoIdElemento = 0;
@@ -40,16 +42,18 @@ class RepositoryNotifier extends _$RepositoryNotifier{
       final contenidoString = await archivo.readAsString();
       final crudo=jsonDecode(contenidoString) as Map<String, dynamic>;
 
+      final json = _recuperacionData(crudo);
+
       final mapaUsuarios = <int, Usuario>{};
-      for ( final usu in (crudo['usuarios'] as List)){
+      for ( final usu in (json['usuarios'] as List)){
         final usuario = Usuario.fromJson(usu as Map<String, dynamic>);
         mapaUsuarios[usuario.id] = usuario;
         if(usuario.id >= this._ultimoIdUsuario) this._ultimoIdUsuario = usuario.id + 1;
       }
 
       final mapaListas = <int, Lista>{};
-      for ( final l in (crudo['listas'] as List)){
-        final lista = Lista.fromJson(l as Map<String, dynamic>, mapaUsuarios);
+      for ( final l in (json['listas'] as List)){
+        final lista = Lista.fromJson(l as Map<String, dynamic>);
         mapaListas[lista.id] = lista;
         if(lista.id >= this._ultimoIdLista) this._ultimoIdLista = lista.id + 1;
         
@@ -58,14 +62,19 @@ class RepositoryNotifier extends _$RepositoryNotifier{
         }
       }
 
-      return(_AppState(listas: mapaListas, usuarios: mapaUsuarios));
+      return(_AppState(
+        listas: mapaListas, 
+        usuarios: mapaUsuarios, 
+        principalUsuarioID: json['usuarioPrincipalId'] as int
+      ));
     }
     else{
 
       int idUsuario = _getIdUsuario();
       return(_AppState(
         listas: {}, 
-        usuarios: { idUsuario : Usuario(id: idUsuario)}
+        usuarios: { idUsuario : Usuario(id: idUsuario)},
+        principalUsuarioID: idUsuario
       ));
     }
 
@@ -78,14 +87,13 @@ class RepositoryNotifier extends _$RepositoryNotifier{
   void setIdLista(int idLista) => this._ultimoIdLista = idLista;
   void setIdElemento(int idElemento) => this._ultimoIdElemento = idElemento;
 
-  void _actualizarState(Map<int, Lista> listasMapa, Map<int, Usuario> usuariosMapa){
+  void _actualizarState({required Map<int, Lista> listasMapa,required  Map<int, Usuario> usuariosMapa,required  int principalUsuarioID}){
     state = AsyncValue.data(_AppState(
       listas: listasMapa, 
-      usuarios: usuariosMapa
+      usuarios: usuariosMapa,
+      principalUsuarioID: principalUsuarioID
     ));
     _guardarDatos();
-    
-    print("\n\n\n actualizarState \n\n\n");
   }
 
   //## Archivo data.json
@@ -98,12 +106,60 @@ class RepositoryNotifier extends _$RepositoryNotifier{
   Future<void> _guardarDatos() async{
     final File archivo = await this._obtenerArchivo();
 
-    final Map<String, List<Map<String, dynamic>>> contenido = {
+    final Map<String, dynamic> contenido = {
+      'versionData' : versionData,
+      'usuarioPrincipalId' : state.requireValue._principalUsuarioID,
       'usuarios' : state.requireValue._usuarios.values.map((e) => e.toJson()).toList(),
       'listas' : state.requireValue._listas.values.map((e) => e.toJson()).toList()
     };
 
     await archivo.writeAsString(jsonEncode(contenido));
+  }
+
+  Map<String, dynamic> _recuperacionData(Map<String, dynamic> json){
+    Map<String, dynamic> data = {};
+    switch(_versionData(json['versionData'] as int?)){
+      case 1:
+        data = _migrarV1aV2(json);
+        continue def;
+      def:
+      default:
+        return data;
+    }
+  }
+
+  int _versionData(int? versionData){
+    if(versionData == null){
+      return 1;
+    }
+    return versionData;
+  }
+
+  Map<String, dynamic> _migrarV1aV2(Map<String, dynamic> json){
+
+    final mapaUsuarios = <int, Usuario>{};
+    for ( final usu in (json['usuarios'] as List)){
+      final usuario = Usuario.fromJson(usu as Map<String, dynamic>);
+      mapaUsuarios[usuario.id] = usuario;
+      if(usuario.id >= this._ultimoIdUsuario) this._ultimoIdUsuario = usuario.id + 1;
+    }
+
+    final mapaListas = <int, Lista>{};
+    for ( final l in (json['listas'] as List)){
+      final lista = Lista.fromJson(l as Map<String, dynamic>);
+      mapaListas[lista.id] = lista;
+      if(lista.id >= this._ultimoIdLista) this._ultimoIdLista = lista.id + 1;
+      
+      for(final elemento in lista.elementos){
+        if( elemento.id > this._ultimoIdElemento) this._ultimoIdElemento = elemento.id + 1;
+      }
+    }
+
+    return {
+      'usuarioPrincipalId' : mapaUsuarios.keys.first,
+      'usuarios' : mapaUsuarios.values.map((e) => e.toJson()).toList(),
+      'listas' : mapaListas.values.map((e) => e.toJson()).toList()
+    };
   }
 
   // ## Listas
@@ -112,7 +168,7 @@ class RepositoryNotifier extends _$RepositoryNotifier{
     final int idLista = _getIdLista();
     final stateActual = state.requireValue;
     _actualizarState(
-      {...stateActual._listas, 
+      listasMapa: {...stateActual._listas, 
         idLista : Lista(
           nombre: nombreLista, 
           id: idLista, 
@@ -120,26 +176,27 @@ class RepositoryNotifier extends _$RepositoryNotifier{
           emoji: emojiLista
         )
       }, 
-      stateActual._usuarios
+      usuariosMapa: stateActual._usuarios,
+      principalUsuarioID: stateActual._principalUsuarioID
     );
   }
 
   void modificarListaNombre({required int idLista, required String nombreLista}){
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.modifyNombre(nombre: nombreLista);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void modificarListaEmoji({required int idLista, required String emojiLista}){
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.modifyEmoji(emoji: emojiLista);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void eliminarLista({required int idLista}){
     final stateActual = state.requireValue;
     stateActual._listas.remove(idLista);    
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   // ## Elementos
@@ -152,37 +209,37 @@ class RepositoryNotifier extends _$RepositoryNotifier{
       creadorUsuarioId: stateActual._principalUsuarioID, 
       idElemento: _getIdElemento()
     );
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void modificarElementoNombre({required int idLista, required int idElemento ,required String nombreElmento}){
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.modifyElementoNombre(idElemento: idElemento, nombre: nombreElmento);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void modificarElementoEmoji({required int idLista, required int idElemento ,required String emojiElemento}){
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.modifyElementoEmoji(idElemento: idElemento, emoji: emojiElemento);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void eliminarElemento({required int idLista, required int idElemento}){
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.removeElemento(id: idElemento);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void elementoToogleTachado({required int idLista, required int idElemento}){    
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.toggleElemento(id: idElemento);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
   void elementoCambiarOrden({required int idLista, required int idElemento, required int antiguoOrden, required int nuevoOrden}){    
     final stateActual = state.requireValue;
     stateActual._listas[idLista]!.cambiarOrdenElemento(idElemento: idElemento, antiguoOrden: antiguoOrden, nuevoOrden: nuevoOrden);
-    _actualizarState({...stateActual._listas}, stateActual._usuarios);
+    _actualizarState(listasMapa: {...stateActual._listas}, usuariosMapa: stateActual._usuarios, principalUsuarioID: stateActual._principalUsuarioID);
   }
 
 }
