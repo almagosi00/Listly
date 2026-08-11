@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/data/lista.dart';
-import 'package:listly/notifier/listas_notifier.dart';
+import 'package:listly/notifier/repository_notifier.dart';
 import 'package:listly/theme/app_color.dart';
 import 'package:listly/theme/app_sizer.dart';
 import 'package:listly/ui/ui_elementos.dart';
+
 
 class ListasPage extends ConsumerStatefulWidget{
   final String tituloPage;
@@ -22,9 +23,12 @@ class _ListaPageState extends ConsumerState<ListasPage>{
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<Map<int, Lista>> listasAsync = ref.watch(listasProvider);
 
-    return listasAsync.when(
+    final  mapaListasAsync = ref.watch(repositoryProvider.select(
+      (async) => async.whenData((appState) => appState.listas)
+    ));
+
+    return mapaListasAsync.when(
       data: (data) => _pantallaPrincipal(data), 
       error: (error, stackTrace) => _pantallaError(error, stackTrace), 
       loading: () => _pantallaCargando(),
@@ -58,65 +62,89 @@ class _ListaPageState extends ConsumerState<ListasPage>{
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(widget.tituloPage),
       ),
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(AppSizes.radioIconLista),
-                bottomRight: Radius.circular(AppSizes.radioIconLista),
-              ),
-              color: Theme.of(context).colorScheme.primaryContainer,
-            ),
-            padding: const EdgeInsets.all(AppSizes.paddingBuscador),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: this._buscadorController,
-                    decoration: const InputDecoration(
-                      hintText: "Buscar lista...",
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: (text) {
-                      setState(() {},);
-                    },
-                  ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(AppSizes.radioIconLista),
+                  bottomRight: Radius.circular(AppSizes.radioIconLista),
                 ),
-                const SizedBox(width: AppSizes.widthBusquedaSizedBoxRow),
-                Row(
-                  children: [        
-                    Icon(Icons.sort),      
-                    const SizedBox( width: AppSizes.widthOrdenarSizedBoxRow),      
-                    DropdownButton<Ordenar>(
-                      value: this._ordenActual,
-                      items: Ordenar.values.map((orden) => DropdownMenuItem(value: orden ,child: Text(orden.texto))).toList(), 
-                      onChanged: (nuevoOrden) {
-                        setState(() {
-                          this._ordenActual = nuevoOrden!;
-                        });
+                color: Theme.of(context).colorScheme.primaryContainer,
+              ),
+              padding: const EdgeInsets.all(AppSizes.paddingBuscador),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: this._buscadorController,
+                      decoration: const InputDecoration(
+                        hintText: "Buscar lista...",
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (text) {
+                        setState(() {},);
                       },
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.widthBusquedaSizedBoxRow),
+                  Row(
+                    children: [        
+                      Icon(Icons.sort),      
+                      const SizedBox( width: AppSizes.widthOrdenarSizedBoxRow),      
+                      DropdownButton<Ordenar>(
+                        value: this._ordenActual,
+                        items: Ordenar.values.map((orden) => DropdownMenuItem(value: orden ,child: Text(orden.texto))).toList(), 
+                        onChanged: (nuevoOrden) {
+                          setState(() {
+                            this._ordenActual = nuevoOrden!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: 
+              _listas.isEmpty 
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.checklist, size: AppSizes.vacioIconSize, color: AppColor.colorVacio,),
+                    const SizedBox(height: AppSizes.vacioEspacioSuperior),
+                    const Text(
+                      'No hay listas',
+                      style: TextStyle(fontSize: AppSizes.vacioFuenteTamanoSuperior, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppSizes.vacioEspacioInferior),
+                    const Text(
+                      'Toca el botón + para añadir la primera lista',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColor.colorVacio),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          Expanded(child: ListView(
-            padding: const EdgeInsets.all(AppSizes.paddingListaView),
-            children:
-              this._listas.map((lista) => _ListaCard(
-                lista: lista,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ElementosPage(idLista: lista.id,))
-                  );
-                },
-                onOpciones: () => this._mostrarOpciones(context, lista),
-                )).toList(),
-          ))
-        ],
+              )
+              :  ListView(
+                  padding: const EdgeInsets.all(AppSizes.paddingListaView),
+                  children:
+                    this._listas.map((lista) => _ListaCard(
+                      lista: lista,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ElementosPage(idLista: lista.id,))
+                        );
+                      },
+                      onOpciones: () => this._mostrarOpciones(context, lista),
+                      )).toList(),
+                )
+            )
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarDialogoNuevoElemento(context),
@@ -150,34 +178,36 @@ class _ListaPageState extends ConsumerState<ListasPage>{
     showModalBottomSheet(
       context: context, 
       builder: (context){
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.image),
-              title: const Text('Modificar Icono'),
-              onTap: () {
-                Navigator.pop(context);
-                _mostrarDialogoEmoji(context, lista);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Moficiar Nombre'),
-              onTap: () {
-                Navigator.pop(context);
-                _mostrarDialogoNombre(context, lista);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Eliminar'),
-              onTap: () {
-                Navigator.pop(context);
-                ref.read(listasProvider.notifier).eliminarLista(idLista: lista.id);
-              },
-            ),
-          ], 
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: const Text('Modificar Icono'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _mostrarDialogoEmoji(context, lista);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Moficiar Nombre'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _mostrarDialogoNombre(context, lista);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Eliminar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmacionEliminacion(context, lista);
+                },
+              ),
+            ], 
+          )
         );
       }
     );
@@ -199,7 +229,7 @@ class _ListaPageState extends ConsumerState<ListasPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyListaNombre(idLista: lista.id, nombre: controller.text);
+                ref.read(repositoryProvider.notifier).modificarListaNombre(idLista: lista.id, nombreLista: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -229,7 +259,7 @@ class _ListaPageState extends ConsumerState<ListasPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyListaNombre(idLista: lista.id, nombre: controller.text);
+                ref.read(repositoryProvider.notifier).modificarListaEmoji(idLista: lista.id, emojiLista: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -244,7 +274,30 @@ class _ListaPageState extends ConsumerState<ListasPage>{
     );
   }
 
-
+  void _confirmacionEliminacion(BuildContext context, Lista lista){
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('¿Eliminar lista?'),
+          content: Text('Se elimnará "${lista.nombre}"'),
+          actions: [            
+            TextButton(
+              onPressed: () => Navigator.pop(context), 
+              child: const Text('No')
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ref.read(repositoryProvider.notifier).eliminarLista(idLista: lista.id);
+              }, 
+              child: const Text('Sí, eliminar', style: TextStyle(color: Colors.red),),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _mostrarDialogoNuevoElemento(BuildContext context){
     final TextEditingController controllerEmoji = TextEditingController();    
@@ -276,9 +329,9 @@ class _ListaPageState extends ConsumerState<ListasPage>{
             TextButton(
               onPressed: () {
 
-                ref.read(listasProvider.notifier).addLista(
-                  nombre: controllerNombre.text, 
-                  emoji: controllerEmoji.text
+                ref.read(repositoryProvider.notifier).crearLista(
+                  nombreLista: controllerNombre.text, 
+                  emojiLista: controllerEmoji.text
                 );
 
                 Navigator.pop(context);

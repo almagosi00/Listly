@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:listly/data/elemento.dart';
 import 'package:listly/data/lista.dart';
-import 'package:listly/notifier/listas_notifier.dart';
-import 'package:listly/notifier/usuario_notifier.dart';
+import 'package:listly/notifier/repository_notifier.dart';
 import 'package:listly/theme/app_color.dart';
 import 'package:listly/theme/app_sizer.dart';
 
+
 class ElementosPage extends ConsumerStatefulWidget{
 
-  int idLista;
+  final int idLista;
 
   ElementosPage({super.key, required this.idLista});
   
@@ -19,72 +19,115 @@ class ElementosPage extends ConsumerStatefulWidget{
 
 class _ElementosPageState extends ConsumerState<ElementosPage>{
   
-  late Lista _lista;
+  //late Lista _lista;
   late List<Elemento> _elementos;
 
   @override
   Widget build(BuildContext context) {
 
-    this._lista = ref.watch(listasProvider).requireValue[widget.idLista]!;
-    this._elementos = this._lista.elementos;
+    final mapaElementosAsync = ref.watch(repositoryProvider.select(
+      (async) => async.whenData((appState) {
+        final lista = appState.listas[widget.idLista]!;
+        return (lista: lista, modificacion : lista.modificacion);
+      }),
+    ));
+    
+    return mapaElementosAsync.when(
+      data: (data) => _pantallaPrincipal(data.lista), 
+      error: (error, stackTrace) => _pantallaError(error, stackTrace), 
+      loading: () => _pantallaCargando(),
+    );   
+  }
+
+  Widget _pantallaCargando(){
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _pantallaError(Object error, StackTrace stackTrace){
+    print('\n\n ERROR: $error  \n\n STACKTRACE: $stackTrace');
+    return Scaffold(
+      body: Center(
+        child: Text('Error al cargar la lista: ${error}'),
+      ),
+    );
+  }
+
+  Widget _pantallaPrincipal(Lista lista){
+    this._elementos = lista.elementos;
+
+    for( Elemento elemento in _elementos){
+      print(" \n\n\n ${elemento.nombre} - ${elemento.orden}");
+    }
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.pop(context), 
-          icon: const Icon(Icons.arrow_back))
+          icon: const Icon(Icons.arrow_back)
+        ),
+        title: Text(lista.nombre),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ReorderableListView(
-              padding: const EdgeInsets.all(AppSizes.paddingListaView),
-              onReorderItem: (oldIndex, newIndex) {
-                ref.read(listasProvider.notifier).cambiarOrdenElementos(
-                  idLista: widget.idLista, 
-                  idElemento: this._elementos[oldIndex].id, 
-                  nuevoOrden: newIndex
-                );
-                if (oldIndex < newIndex){
-                  for ( int i = oldIndex+1; i <= newIndex; i++){
-                    ref.read(listasProvider.notifier).cambiarOrdenElementos(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: _elementos.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.checklist, size: AppSizes.vacioIconSize, color: AppColor.colorVacio,),
+                    const SizedBox(height: AppSizes.vacioEspacioSuperior),
+                    const Text(
+                      'Esta lista está vacía',
+                      style: TextStyle(fontSize: AppSizes.vacioFuenteTamanoSuperior, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppSizes.vacioEspacioInferior),
+                    const Text(
+                      'Toca el botón + para añadir el primer elemento',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColor.colorVacio),
+                    ),
+                  ],
+                ),
+              )              
+              : ReorderableListView(
+                padding: const EdgeInsets.all(AppSizes.paddingListaView),
+                onReorderItem: (oldIndex, newIndex) {
+                  if(oldIndex != newIndex){
+                    ref.read(repositoryProvider.notifier).elementoCambiarOrden(
                       idLista: widget.idLista, 
-                      idElemento: this._elementos[i].id, 
-                      nuevoOrden: this._elementos[i].orden-1
+                      idElemento: _elementos[oldIndex].id, 
+                      antiguoOrden: oldIndex, 
+                      nuevoOrden: newIndex
                     );
                   }
-                }
-                else{
-                  for ( int i = newIndex; i < oldIndex; i++){
-                    ref.read(listasProvider.notifier).cambiarOrdenElementos(
-                      idLista: widget.idLista, 
-                      idElemento: this._elementos[i].id, 
-                      nuevoOrden: this._elementos[i].orden+1
-                    );
-                  }
-                }
-              },
-              children: this._elementos.map((elemento) => _ElememtoCard(
-                key: ValueKey(elemento.id),
-                elemento: elemento,
-                onTap: () {
-                  ref.read(listasProvider.notifier).toogleElementoTachado(idLista: widget.idLista, idElemento: elemento.id);
                 },
-                onOpciones: () {
-                  _mostrarOpciones(context, elemento);
-                },
-                )).toList(),
+                children: this._elementos.map((elemento) => _ElememtoCard(
+                  key: ValueKey(elemento.id),
+                  elemento: elemento,
+                  onTap: () {
+                    ref.read(repositoryProvider.notifier).elementoToogleTachado(idLista: widget.idLista, idElemento: elemento.id);
+                  },
+                  onOpciones: () {
+                    _mostrarOpciones(context, elemento);
+                  },
+                  )).toList(),
+              ),
             ),
-          ),
-          
-        ],
+            
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarDialogoNuevoElemento(context),
         child: const Icon(Icons.add),
       ),
     );
-
   }
 
 
@@ -92,34 +135,36 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
     showModalBottomSheet(
       context: context, 
       builder: (context){
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.image),
-              title: const Text('Modificar Icono'),
-              onTap: () {
-                Navigator.pop(context);
-                _mostrarDialogoEmoji(context, elemento);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Moficiar Nombre'),
-              onTap: () {
-                Navigator.pop(context);
-                _mostrarDialogoNombre(context, elemento);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Eliminar'),
-              onTap: () {
-                Navigator.pop(context);
-                ref.read(listasProvider.notifier).eliminarElemento(idLista: widget.idLista, idElemento: elemento.id);
-              },
-            ),
-          ], 
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: const Text('Modificar Icono'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _mostrarDialogoEmoji(context, elemento);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Moficiar Nombre'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _mostrarDialogoNombre(context, elemento);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Eliminar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmacionEliminacion(context, elemento);
+                },
+              ),
+            ], 
+          ),
         );
       }
     );
@@ -141,7 +186,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyElementoNombre(idLista: widget.idLista, idElemento: elemento.id, nombre: controller.text);
+                ref.read(repositoryProvider.notifier).modificarElementoNombre(idLista: widget.idLista, idElemento: elemento.id, nombreElmento: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -171,7 +216,7 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(listasProvider.notifier).modifyElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emoji: controller.text);
+                ref.read(repositoryProvider.notifier).modificarElementoEmoji(idLista: widget.idLista, idElemento: elemento.id, emojiElemento: controller.text);
                 Navigator.pop(context);
               },
               child: const Text('Guardar')
@@ -183,6 +228,31 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
           ],
         );
       }
+    );
+  }
+
+  void _confirmacionEliminacion(BuildContext context, Elemento elemento){
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('¿Eliminar elemento?'),
+          content: Text('Se elimnará "${elemento.nombre}" de esta lista'),
+          actions: [            
+            TextButton(
+              onPressed: () => Navigator.pop(context), 
+              child: const Text('No')
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ref.read(repositoryProvider.notifier).eliminarElemento(idLista: widget.idLista, idElemento: elemento.id);
+              }, 
+              child: const Text('Sí, eliminar', style: TextStyle(color: Colors.red),),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -216,10 +286,10 @@ class _ElementosPageState extends ConsumerState<ElementosPage>{
             TextButton(
               onPressed: () {
 
-                ref.read(listasProvider.notifier).addElemento(
+                ref.read(repositoryProvider.notifier).crearElemento(
                   idLista: widget.idLista, 
-                  nombre: controllerNombre.text, 
-                  emoji: controllerEmoji.text
+                  nombreElemento: controllerNombre.text, 
+                  emojiElemento: controllerEmoji.text
                 );
 
                 Navigator.pop(context);

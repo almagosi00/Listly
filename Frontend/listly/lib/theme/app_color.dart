@@ -4,4 +4,5 @@ class AppColor{
   static const Color colorIconLista = Color(0xFFE4EAE1);
   static const Color colorElementoTachado = Color(0x00000000);
   static const Color colorIconListaShare = Colors.white;
+  static const Color colorVacio = Colors.grey;
 }

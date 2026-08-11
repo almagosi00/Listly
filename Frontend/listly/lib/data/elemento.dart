@@ -6,9 +6,9 @@ class Elemento{
   String _nombre;
   String _emoji;
   bool _tachado = false;
-  final Usuario _creador;
+  final int _creadorUsuarioId;
 
-  Elemento({required this._id, required this._orden, required this._nombre, required this._creador, this._emoji = ""});
+  Elemento({required this._id, required this._orden, required this._nombre, required this._creadorUsuarioId, this._emoji = ""});
 
   void toggleTachado(){
     this._tachado = !this._tachado;
@@ -27,7 +27,7 @@ class Elemento{
   }
 
   String get nombre => this._nombre;
-  String get emoji => this._emoji ?? "";
+  String get emoji => this._emoji;
   bool get tachado => this._tachado;
   int get id => this._id;
   int get orden => this._orden;  
@@ -37,16 +37,16 @@ class Elemento{
     'nombre': this.nombre,
     'emoji': this._emoji,
     'tachado': this.tachado,
-    'creadorId': this._creador.id,
+    'creadorId': this._creadorUsuarioId,
     'orden': this._orden,
   };
 
-  factory Elemento.fromJson(Map<String, dynamic> json, Map<int, Usuario> usuariosConocidos){
+  factory Elemento.fromJson(Map<String, dynamic> json){
     final Elemento elemento = Elemento(
       id: json['id'] as int, 
       orden: json['orden'] as int, 
       nombre: json['nombre'] as String, 
-      creador: usuariosConocidos[json['creadorId'] as int]!,
+      creadorUsuarioId: json['creadorId'] as int,
       emoji: json['emoji'] as String,
     );
     elemento._tachado = json['tachado'] as bool;

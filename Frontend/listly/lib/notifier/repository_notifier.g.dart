@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'usuario_notifier.dart';
+part of 'repository_notifier.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,43 +9,44 @@ part of 'usuario_notifier.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(UsuarioNotifier)
-final usuarioProvider = UsuarioNotifierProvider._();
+@ProviderFor(RepositoryNotifier)
+final repositoryProvider = RepositoryNotifierProvider._();
 
-final class UsuarioNotifierProvider
-    extends $AsyncNotifierProvider<UsuarioNotifier, Usuario> {
-  UsuarioNotifierProvider._()
+final class RepositoryNotifierProvider
+    extends $AsyncNotifierProvider<RepositoryNotifier, _AppState> {
+  RepositoryNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'usuarioProvider',
+        name: r'repositoryProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$usuarioNotifierHash();
+  String debugGetCreateSourceHash() => _$repositoryNotifierHash();
 
   @$internal
   @override
-  UsuarioNotifier create() => UsuarioNotifier();
+  RepositoryNotifier create() => RepositoryNotifier();
 }
 
-String _$usuarioNotifierHash() => r'fdb9d8d419d8db3bde6263a006c05ea10b48d23d';
+String _$repositoryNotifierHash() =>
+    r'fec44367a5a038b9881f6d25b4e47eca2e832017';
 
-abstract class _$UsuarioNotifier extends $AsyncNotifier<Usuario> {
-  FutureOr<Usuario> build();
+abstract class _$RepositoryNotifier extends $AsyncNotifier<_AppState> {
+  FutureOr<_AppState> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<Usuario>, Usuario>;
+    final ref = this.ref as $Ref<AsyncValue<_AppState>, _AppState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<Usuario>, Usuario>,
-              AsyncValue<Usuario>,
+              AnyNotifier<AsyncValue<_AppState>, _AppState>,
+              AsyncValue<_AppState>,
               Object?,
               Object?
             >;

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:listly/data/usuario.dart';
 import 'package:listly/data/elemento.dart';
 import 'package:listly/data/rol.dart';
@@ -14,7 +13,7 @@ class Lista{
   final Map<int,Elemento> _elementos;
   final List<RolLista> _rolesLista;
 
-  Lista({required this._nombre, required this._id, required Usuario usuarioPropietario, this._emoji = "", 
+  Lista({required this._nombre, required this._id, required int propietarioUsuarioId, this._emoji = "", 
   Map<int,Elemento>? elementos, List<RolLista>? rolesLista, DateTime? creacion, DateTime? modificacion})
   :_elementos = elementos ?? {},
   _rolesLista = rolesLista ?? [],
@@ -22,13 +21,8 @@ class Lista{
   _modificacion = modificacion ?? DateTime.now()
   {
     if(rolesLista == null){
-      _rolesLista.add(RolLista(rol: Rol.propietario, usuario: usuarioPropietario));
+      _rolesLista.add(RolLista(rol: Rol.propietario, usuarioId: propietarioUsuarioId));
     }
-  }
-
-  void addMiembro({required Usuario usuario, required Rol rol}){
-    this._rolesLista.add(RolLista(rol: rol, usuario: usuario));
-    this._modificacion = DateTime.now();
   }
 
   void modifyEmoji({required String emoji}){
@@ -43,8 +37,8 @@ class Lista{
 
   // ## Métodos Elementos
 
-  void addElemento({required String nombre, required String emoji, required Usuario creador, required int idElemento}){
-    this._elementos[idElemento] = Elemento(id: idElemento, orden: this._elementos.length, nombre: nombre, creador: creador, emoji: emoji);
+  void addElemento({required String nombre, required String emoji, required int creadorUsuarioId, required int idElemento}){
+    this._elementos[idElemento] = Elemento(id: idElemento, orden: this._elementos.length, nombre: nombre, creadorUsuarioId: creadorUsuarioId, emoji: emoji);
     
     this._modificacion = DateTime.now();
   }
@@ -52,11 +46,11 @@ class Lista{
   void removeElemento({required int id}){
     Elemento ele = this._elementos.remove(id)!;
 
-    this.elementos.forEach((elemento) {
+    for( Elemento elemento in _elementos.values){
       if(elemento.orden > ele.orden){
-        elemento.cambiarOrden(elemento.orden-1);
+        elemento.cambiarOrden(elemento.orden - 1);
       }
-    });
+    }
     
     this._modificacion = DateTime.now();
   }
@@ -66,8 +60,24 @@ class Lista{
     this._modificacion = DateTime.now();
   }
 
-  void cambiarOrdenElemento({required int idElemento, required int nuevoOrden}){
-    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);    
+  void cambiarOrdenElemento({required int idElemento, required int antiguoOrden, required int nuevoOrden}){
+
+    if (antiguoOrden < nuevoOrden){
+      _elementos.forEach((idElemento, elemento) {
+        if(antiguoOrden < elemento.orden && elemento.orden <= nuevoOrden){
+          elemento.cambiarOrden(elemento.orden-1);
+        }
+      });
+    }
+    else{
+      _elementos.forEach((idElemento, elemento) {
+        if(nuevoOrden <= elemento.orden && elemento.orden < antiguoOrden){
+          elemento.cambiarOrden(elemento.orden+1);
+        }
+      });
+    }
+    this._elementos[idElemento]!.cambiarOrden(nuevoOrden);   
+
     this._modificacion = DateTime.now();
   }
 
@@ -105,15 +115,15 @@ class Lista{
     'roles': this._rolesLista.map((e) => e.toJson()).toList(),
   };
 
-  factory Lista.fromJson(Map<String, dynamic> json, Map<int, Usuario> usuariosConocidos){
+  factory Lista.fromJson(Map<String, dynamic> json){
 
-    List<Elemento> elementos = (json['elementos'] as List).map((e) => Elemento.fromJson(e as Map<String, dynamic>, usuariosConocidos)).toList();
-    List<RolLista> roles = (json['roles'] as List).map((e) => RolLista.fromJson(e as Map<String, dynamic>, usuariosConocidos)).toList();
+    List<Elemento> elementos = (json['elementos'] as List).map((e) => Elemento.fromJson(e as Map<String, dynamic>)).toList();
+    List<RolLista> roles = (json['roles'] as List).map((e) => RolLista.fromJson(e as Map<String, dynamic>)).toList();
 
     final Lista lista = Lista(
       nombre: json['nombre'] as String, 
       id: json['id'] as int, 
-      usuarioPropietario: roles.firstWhere((element) => element.rol == Rol.propietario).usuario,
+      propietarioUsuarioId: roles.firstWhere((element) => element.rol == Rol.propietario).usuarioId,
       emoji: json['emoji'],
       rolesLista: roles,
       elementos: { for (var element in elementos) element.id : element },
