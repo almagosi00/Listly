@@ -124,7 +124,7 @@ class RepositoryNotifier extends _$RepositoryNotifier{
         continue def;
       def:
       default:
-        return data;
+        return json;
     }
   }
 
